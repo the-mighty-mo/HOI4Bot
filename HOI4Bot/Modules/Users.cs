@@ -161,13 +161,11 @@ namespace HOI4Bot.Modules
         [Command("surrender")]
         public async Task SurrenderAsync()
         {
-
         }
 
         [Command("unsurrender")]
         public async Task UnsurrenderAsync()
         {
-
         }
     }
 }
