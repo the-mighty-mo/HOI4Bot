@@ -5,4 +5,4 @@
 
 Hearts of Randomizer - Version 1.0
 
-Created with .NET Framework 4.8 (C# 7.3), Discord.Net v2.1.1, and Microsoft.Data.Sqlite v2.2.6
+Created with .NET Framework 4.8, Discord.Net v2.2.0, and Microsoft.Data.Sqlite v3.1.6
