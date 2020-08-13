@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.29806.167
+VisualStudioVersion = 16.0.30406.217
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HOI4Bot", "HOI4Bot\HOI4Bot.csproj", "{BB3CF8B3-E441-4E44-884B-038E9D52B558}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HOI4Bot", "HOI4Bot\HOI4Bot.csproj", "{782870E7-1B7E-4759-9B91-56F6EDFA1148}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BB3CF8B3-E441-4E44-884B-038E9D52B558}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BB3CF8B3-E441-4E44-884B-038E9D52B558}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BB3CF8B3-E441-4E44-884B-038E9D52B558}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BB3CF8B3-E441-4E44-884B-038E9D52B558}.Release|Any CPU.Build.0 = Release|Any CPU
+		{782870E7-1B7E-4759-9B91-56F6EDFA1148}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{782870E7-1B7E-4759-9B91-56F6EDFA1148}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{782870E7-1B7E-4759-9B91-56F6EDFA1148}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{782870E7-1B7E-4759-9B91-56F6EDFA1148}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {9CF6436B-618C-4191-9B28-678E9E8184E7}
+		SolutionGuid = {90E0A549-332E-4DA5-87B2-A9BA26B1EAC7}
 	EndGlobalSection
 EndGlobal
