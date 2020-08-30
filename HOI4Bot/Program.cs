@@ -38,7 +38,10 @@ namespace HOI4Bot
                     if (isConsole)
                     {
                         Console.WriteLine("Program is already running");
-                        Console.ReadLine();
+                        await Task.WhenAny(
+                            Task.Run(() => Console.ReadLine()),
+                            Task.Delay(5000)
+                        );
                     }
                     return;
                 }
