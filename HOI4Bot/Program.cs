@@ -2,78 +2,63 @@
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace HOI4Bot
 {
-    public class Program
+    public static class Program
     {
-        static void Main() => new Program().StartAsync().GetAwaiter().GetResult();
+        private static DiscordSocketConfig config;
+        private static DiscordSocketClient client;
+        private static CommandHandler handler;
 
-        private DiscordSocketConfig _config;
-        private DiscordSocketClient _client;
-        private CommandHandler _handler;
+        public static readonly Random rng = new Random();
 
-        public static readonly bool isConsole = Console.OpenStandardInput(1) != Stream.Null;
-
-        public async Task StartAsync()
+        public static async Task Main()
         {
-            if (isConsole)
-            {
-                Console.Title = SecurityInfo.botName;
-            }
-
-            bool isRunning = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Count() > 1;
-            if (isRunning)
+            static bool isRunning() => Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Count() > 1;
+            if (isRunning())
             {
                 await Task.Delay(1000);
 
-                isRunning = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName).Count() > 1;
-                if (isRunning)
+                if (isRunning())
                 {
-                    if (isConsole)
-                    {
-                        Console.WriteLine("Program is already running");
-                        await Task.WhenAny(
-                            Task.Run(() => Console.ReadLine()),
-                            Task.Delay(5000)
-                        );
-                    }
+                    Console.WriteLine("Program is already running");
+                    await Task.WhenAny(
+                        Task.Run(() => Console.ReadLine()),
+                        Task.Delay(5000)
+                    );
                     return;
                 }
             }
 
-            List<Task> initSqlite = new List<Task>()
-            {
-                SQLCommands.InitUsersSqliteAsync()
-            };
+            Task initSqlite = DatabaseManager.InitAsync().ContinueWith(x => Console.WriteLine($"{SecurityInfo.botName} has finished loading"));
+            Task initCommandHandler = SetupCommandHandlerAsync();
 
-            _config = new DiscordSocketConfig
+            await Task.WhenAll(
+                initSqlite,
+                initCommandHandler
+            );
+            await Task.Delay(-1);
+        }
+
+        private static async Task SetupCommandHandlerAsync()
+        {
+            config = new DiscordSocketConfig
             {
                 AlwaysDownloadUsers = false
             };
-            _client = new DiscordSocketClient(_config);
+            client = new DiscordSocketClient(config);
 
-            await _client.LoginAsync(TokenType.Bot, SecurityInfo.token);
-            await _client.StartAsync();
-            await _client.SetGameAsync($"@{SecurityInfo.botName} help", null, ActivityType.Listening);
+            await client.LoginAsync(TokenType.Bot, SecurityInfo.token);
+            await client.StartAsync();
+            await client.SetGameAsync($"@{SecurityInfo.botName} help", null, ActivityType.Listening);
 
             IServiceProvider _services = new ServiceCollection().BuildServiceProvider();
-            _handler = new CommandHandler(_client, _services);
-            Task initCmd = _handler.InitCommandsAsync();
-
-            await Task.WhenAll(initSqlite);
-            if (isConsole)
-            {
-                Console.WriteLine($"{SecurityInfo.botName} has finished loading");
-            }
-
-            await initCmd;
-            await Task.Delay(-1);
+            handler = new CommandHandler(client, _services);
+            await handler.InitCommandsAsync();
         }
     }
 }

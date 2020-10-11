@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static HOI4Bot.Constants;
+using static HOI4Bot.DatabaseManager;
 
 namespace HOI4Bot.Modules
 {
@@ -52,9 +53,9 @@ namespace HOI4Bot.Modules
         public async Task OptInAsync(SocketUser user)
         {
             string country;
-            if (await SQLCommands.IsUserAsync(user.Id.ToString(), Context.Guild.Id.ToString()))
+            if (await userDatabase.Users.IsUserAsync(user.Id.ToString(), Context.Guild.Id.ToString()))
             {
-                country = await SQLCommands.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
+                country = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
                 await Context.Channel.SendMessageAsync($"You are already part of the next war as: {country}.");
                 return;
             }
@@ -62,7 +63,7 @@ namespace HOI4Bot.Modules
             List<string> mijorCountries = new List<string>().Concat(mijorAllies).Concat(mijorAxis).ToList();
             List<string> minorCountries = new List<string>().Concat(minorAllies).Concat(minorAxis).ToList();
 
-            List<string> usedCountries = await SQLCommands.GetCountriesAsync(Context.Guild.Id.ToString());
+            List<string> usedCountries = await userDatabase.Users.GetCountriesAsync(Context.Guild.Id.ToString());
             List<string> availableCountries = majorCountries.Where(x => !usedCountries.Contains(x)).ToList();
             if (availableCountries.Count == 0)
             {
@@ -76,12 +77,12 @@ namespace HOI4Bot.Modules
 
             List<Task> cmds = new List<Task>()
             {
-                SQLCommands.AddUserAsync(user.Id.ToString(), country, Context.Guild.Id.ToString()),
+                userDatabase.Users.AddUserAsync(user.Id.ToString(), country, Context.Guild.Id.ToString()),
                 Context.Channel.SendMessageAsync($"You have joined the next war as: {country}.")
             };
 
             SocketRole role;
-            if (ulong.TryParse(await SQLCommands.GetRoleAsync(country, Context.Guild.Id.ToString()), out ulong roleId) && (role = Context.Guild.GetRole(roleId)) != null)
+            if (ulong.TryParse(await userDatabase.Roles.GetRoleAsync(country, Context.Guild.Id.ToString()), out ulong roleId) && (role = Context.Guild.GetRole(roleId)) != null)
             {
                 cmds.Add(Context.Guild.GetUser(user.Id).AddRoleAsync(role));
             }
@@ -96,7 +97,7 @@ namespace HOI4Bot.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task OptOutAsync(SocketUser user)
         {
-            if (!await SQLCommands.IsUserAsync(user.Id.ToString(), Context.Guild.Id.ToString()))
+            if (!await userDatabase.Users.IsUserAsync(user.Id.ToString(), Context.Guild.Id.ToString()))
             {
                 await Context.Channel.SendMessageAsync("You are already out of the next war.");
                 return;
@@ -106,18 +107,18 @@ namespace HOI4Bot.Modules
             List<string> mijorCountries = new List<string>().Concat(mijorAllies).Concat(mijorAxis).ToList();
             List<string> minorCountries = new List<string>().Concat(minorAllies).Concat(minorAxis).ToList();
 
-            string country = await SQLCommands.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
-            Dictionary<string, string> userCountries = await SQLCommands.GetUsersAsync(Context.Guild.Id.ToString());
+            string country = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
+            Dictionary<string, string> userCountries = await userDatabase.Users.GetUsersAsync(Context.Guild.Id.ToString());
             IEnumerable<string> userMinors = userCountries.Values.Where(x => minorCountries.Contains(x));
 
             List<Task> cmds = new List<Task>()
             {
-                SQLCommands.RemoveUserAsync(user.Id.ToString(), Context.Guild.Id.ToString()),
+                userDatabase.Users.RemoveUserAsync(user.Id.ToString(), Context.Guild.Id.ToString()),
                 Context.Channel.SendMessageAsync("You have left the next war.")
             };
 
             SocketRole role;
-            if (ulong.TryParse(await SQLCommands.GetRoleAsync(country, Context.Guild.Id.ToString()), out ulong roleId) && (role = Context.Guild.GetRole(roleId)) != null)
+            if (ulong.TryParse(await userDatabase.Roles.GetRoleAsync(country, Context.Guild.Id.ToString()), out ulong roleId) && (role = Context.Guild.GetRole(roleId)) != null)
             {
                 cmds.Add(Context.Guild.GetUser(user.Id).RemoveRoleAsync(role));
             }
@@ -139,7 +140,7 @@ namespace HOI4Bot.Modules
                 while (newUser == null);
 
                 SocketRole oldRole;
-                if (ulong.TryParse(await SQLCommands.GetRoleAsync(country, Context.Guild.Id.ToString()), out ulong oldRoleId) && (oldRole = Context.Guild.GetRole(oldRoleId)) != null)
+                if (ulong.TryParse(await userDatabase.Roles.GetRoleAsync(country, Context.Guild.Id.ToString()), out ulong oldRoleId) && (oldRole = Context.Guild.GetRole(oldRoleId)) != null)
                 {
                     await Context.Guild.GetUser(newUser.Id).RemoveRoleAsync(oldRole);
                 }
@@ -147,11 +148,11 @@ namespace HOI4Bot.Modules
                 await Task.WhenAll
                 (
                     Context.Channel.SendMessageAsync($"{newUser.Mention} has taken over as {country}."),
-                    SQLCommands.AddUserAsync(newUser.Id.ToString(), country, Context.Guild.Id.ToString())
+                    userDatabase.Users.AddUserAsync(newUser.Id.ToString(), country, Context.Guild.Id.ToString())
                 );
 
                 SocketRole newRole;
-                if (ulong.TryParse(await SQLCommands.GetRoleAsync(country, Context.Guild.Id.ToString()), out ulong newRoleId) && (newRole = Context.Guild.GetRole(newRoleId)) != null)
+                if (ulong.TryParse(await userDatabase.Roles.GetRoleAsync(country, Context.Guild.Id.ToString()), out ulong newRoleId) && (newRole = Context.Guild.GetRole(newRoleId)) != null)
                 {
                     await Context.Guild.GetUser(newUser.Id).AddRoleAsync(newRole);
                 }

@@ -13,31 +13,30 @@ namespace HOI4Bot
         public const string prefix = "\\";
         public static int argPos = 0;
 
-        private readonly DiscordSocketClient _client;
-        private readonly CommandService _commands;
-        private readonly IServiceProvider _services;
+        private readonly DiscordSocketClient client;
+        private readonly CommandService commands;
+        private readonly IServiceProvider services;
 
         public CommandHandler(DiscordSocketClient client, IServiceProvider services)
         {
-            _client = client;
-            _services = services;
+            this.client = client;
+            this.services = services;
 
             CommandServiceConfig config = new CommandServiceConfig()
             {
                 DefaultRunMode = RunMode.Async
             };
-            _commands = new CommandService(config);
+            commands = new CommandService(config);
         }
 
         public async Task InitCommandsAsync()
         {
-            _client.Connected += SendConnectMessage;
-            _client.Disconnected += SendDisconnectError;
-            _client.JoinedGuild += SendJoinMessage;
-            _client.MessageReceived += HandleCommandAsync;
+            client.Connected += SendConnectMessage;
+            client.Disconnected += SendDisconnectError;
+            client.MessageReceived += HandleCommandAsync;
 
-            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
-            _commands.CommandExecuted += SendErrorAsync;
+            await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
+            commands.CommandExecuted += SendErrorAsync;
         }
 
         private async Task SendErrorAsync(Optional<CommandInfo> info, ICommandContext context, IResult result)
@@ -50,45 +49,39 @@ namespace HOI4Bot
 
         private async Task SendConnectMessage()
         {
-            if (Program.isConsole)
-            {
-                await Console.Out.WriteLineAsync($"{SecurityInfo.botName} is online");
-            }
+            await Console.Out.WriteLineAsync($"{SecurityInfo.botName} is online");
         }
 
         private async Task SendDisconnectError(Exception e)
         {
-            if (Program.isConsole)
-            {
-                await Console.Out.WriteLineAsync(e.Message);
-            }
+            await Console.Out.WriteLineAsync(e.Message);
         }
 
-        private async Task SendJoinMessage(SocketGuild g) => await g.DefaultChannel.SendMessageAsync("Death to [insert ethnicity/social class here]");
+        private async Task<bool> CanBotRunCommandsAsync(SocketUserMessage msg) => await Task.Run(() => false);
+        private async Task<bool> ShouldDeleteBotCommands() => await Task.Run(() => true);
 
         private async Task HandleCommandAsync(SocketMessage m)
         {
-            if (!(m is SocketUserMessage msg) || (msg.Author.IsBot && msg.Author.Id != _client.CurrentUser.Id))
+            if (!(m is SocketUserMessage msg) || (msg.Author.IsBot && !await CanBotRunCommandsAsync(msg)))
             {
                 return;
             }
 
-            SocketCommandContext Context = new SocketCommandContext(_client, msg);
+            SocketCommandContext Context = new SocketCommandContext(client, msg);
+            bool isCommand = msg.HasMentionPrefix(client.CurrentUser, ref argPos) || msg.HasStringPrefix(prefix, ref argPos);
 
-            bool isCommand = msg.HasMentionPrefix(_client.CurrentUser, ref argPos) || msg.HasStringPrefix(prefix, ref argPos);
             if (isCommand)
             {
-                var result = await _commands.ExecuteAsync(Context, argPos, _services);
+                var result = await commands.ExecuteAsync(Context, argPos, services);
 
                 List<Task> cmds = new List<Task>();
-                if (!result.IsSuccess && result.Error == CommandError.UnmetPrecondition)
-                {
-                    cmds.Add(Context.Channel.SendMessageAsync(result.ErrorReason));
-                }
-
-                if (msg.Author.IsBot)
+                if (msg.Author.IsBot && await ShouldDeleteBotCommands())
                 {
                     cmds.Add(msg.DeleteAsync());
+                }
+                else if (!result.IsSuccess && result.Error == CommandError.UnmetPrecondition)
+                {
+                    cmds.Add(Context.Channel.SendMessageAsync(result.ErrorReason));
                 }
 
                 await Task.WhenAll(cmds);
