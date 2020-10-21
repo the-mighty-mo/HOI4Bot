@@ -11,7 +11,7 @@ namespace HOI4Bot.Modules
         {
             EmbedBuilder embed = new EmbedBuilder()
                 .WithColor(SecurityInfo.botColor)
-                .WithTitle("Help");
+                .WithTitle(SecurityInfo.botName);
 
             EmbedFieldBuilder prefix = new EmbedFieldBuilder()
                 .WithIsInline(false)
