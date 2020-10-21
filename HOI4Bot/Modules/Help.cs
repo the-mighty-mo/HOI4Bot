@@ -27,8 +27,6 @@ namespace HOI4Bot.Modules
                 .WithValue(
                     "ping\n" +
                     "  - Returns the bot's Server and API latencies\n\n" +
-                    "help\n" +
-                    "  - Displays this help message\n\n" +
                     "countries\n" +
                     "  - Displays a list of valid countries\n\n" +
                     "opt-in [user mention (admin only)]\n" +
