@@ -14,35 +14,52 @@ namespace HOI4Bot.Modules
         [Command("countries")]
         public async Task CountriesAsync()
         {
-            string countries = "Allies:\n";
+            EmbedBuilder embed = new EmbedBuilder()
+                .WithColor(SecurityInfo.botColor)
+                .WithTitle("Countries");
+
+            string allies = "";
             foreach (string country in majorAllies) {
-                countries += $"- {country}\n";
+                allies += $"- {country}\n";
             }
             foreach (string country in mijorAllies)
             {
-                countries += $"- {country}\n";
+                allies += $"- {country}\n";
             }
-            countries += "*Minor Allies:*\n";
+            allies += "**Minor Allies:**\n";
             foreach (string country in minorAllies)
             {
-                countries += $"- {country}\n";
+                allies += $"- {country}\n";
             }
-            countries += "Axis:\n";
+
+            EmbedFieldBuilder allyField = new EmbedFieldBuilder()
+                .WithIsInline(true)
+                .WithName("Allies")
+                .WithValue(allies);
+            embed.AddField(allyField);
+
+            string axis = "";
             foreach (string country in majorAxis)
             {
-                countries += $"- {country}\n";
+                axis += $"- {country}\n";
             }
             foreach (string country in mijorAxis)
             {
-                countries += $"- {country}\n";
+                axis += $"- {country}\n";
             }
-            countries += "*Minor Axis:*\n";
+            axis += "\n**Minor Axis:**\n";
             foreach (string country in minorAxis)
             {
-                countries += $"- {country}\n";
+                axis += $"- {country}\n";
             }
 
-            await Context.Channel.SendMessageAsync(countries);
+            EmbedFieldBuilder axisField = new EmbedFieldBuilder()
+                .WithIsInline(true)
+                .WithName("Axis")
+                .WithValue(axis);
+            embed.AddField(axisField);
+
+            await Context.Channel.SendMessageAsync(embed: embed.Build());
         }
 
         [Command("opt-in")]
@@ -56,7 +73,12 @@ namespace HOI4Bot.Modules
             if (await userDatabase.Users.IsUserAsync(user.Id.ToString(), Context.Guild.Id.ToString()))
             {
                 country = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
-                await Context.Channel.SendMessageAsync($"You are already part of the next war as: {country}.");
+
+                EmbedBuilder emb = new EmbedBuilder()
+                    .WithColor(SecurityInfo.botColor)
+                    .WithDescription($"You are already part of the next war as: {country}.");
+
+                await Context.Channel.SendMessageAsync(embed: emb.Build());
                 return;
             }
             List<string> majorCountries = new List<string>().Concat(majorAllies).Concat(majorAxis).ToList();
@@ -75,10 +97,14 @@ namespace HOI4Bot.Modules
             }
             country = availableCountries[random.Next(0, availableCountries.Count)];
 
+            EmbedBuilder embed = new EmbedBuilder()
+                .WithColor(SecurityInfo.botColor)
+                .WithDescription($"You have joined the next war as: {country}.");
+
             List<Task> cmds = new List<Task>()
             {
                 userDatabase.Users.AddUserAsync(user.Id.ToString(), country, Context.Guild.Id.ToString()),
-                Context.Channel.SendMessageAsync($"You have joined the next war as: {country}.")
+                Context.Channel.SendMessageAsync(embed: embed.Build())
             };
 
             SocketRole role;
@@ -99,7 +125,11 @@ namespace HOI4Bot.Modules
         {
             if (!await userDatabase.Users.IsUserAsync(user.Id.ToString(), Context.Guild.Id.ToString()))
             {
-                await Context.Channel.SendMessageAsync("You are already out of the next war.");
+                EmbedBuilder emb = new EmbedBuilder()
+                    .WithColor(SecurityInfo.botColor)
+                    .WithDescription("You are already out of the next war.");
+
+                await Context.Channel.SendMessageAsync(embed: emb.Build());
                 return;
             }
 
@@ -111,10 +141,14 @@ namespace HOI4Bot.Modules
             Dictionary<string, string> userCountries = await userDatabase.Users.GetUsersAsync(Context.Guild.Id.ToString());
             IEnumerable<string> userMinors = userCountries.Values.Where(x => minorCountries.Contains(x));
 
+            EmbedBuilder embed = new EmbedBuilder()
+                .WithColor(SecurityInfo.botColor)
+                .WithDescription("You have left the next war.");
+
             List<Task> cmds = new List<Task>()
             {
                 userDatabase.Users.RemoveUserAsync(user.Id.ToString(), Context.Guild.Id.ToString()),
-                Context.Channel.SendMessageAsync("You have left the next war.")
+                Context.Channel.SendMessageAsync(embed: embed.Build())
             };
 
             SocketRole role;
@@ -145,9 +179,13 @@ namespace HOI4Bot.Modules
                     await Context.Guild.GetUser(newUser.Id).RemoveRoleAsync(oldRole);
                 }
 
+                EmbedBuilder takeover = new EmbedBuilder()
+                    .WithColor(SecurityInfo.botColor)
+                    .WithDescription($"{newUser.Mention} has taken over as {country}.");
+
                 await Task.WhenAll
                 (
-                    Context.Channel.SendMessageAsync($"{newUser.Mention} has taken over as {country}."),
+                    Context.Channel.SendMessageAsync(embed: takeover.Build()),
                     userDatabase.Users.AddUserAsync(newUser.Id.ToString(), country, Context.Guild.Id.ToString())
                 );
 
