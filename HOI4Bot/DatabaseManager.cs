@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using HOI4Bot.Databases;
+﻿using HOI4Bot.Databases;
+using System.Threading.Tasks;
 
 namespace HOI4Bot
 {

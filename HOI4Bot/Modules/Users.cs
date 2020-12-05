@@ -19,7 +19,8 @@ namespace HOI4Bot.Modules
                 .WithTitle("Countries");
 
             string allies = "";
-            foreach (string country in majorAllies) {
+            foreach (string country in majorAllies)
+            {
                 allies += $"- {country}\n";
             }
             foreach (string country in mijorAllies)
@@ -159,7 +160,7 @@ namespace HOI4Bot.Modules
 
             await Task.WhenAll(cmds);
 
-            if ((majorCountries.Contains(country) || mijorCountries.Contains(country)) && userMinors.Count() > 0)
+            if ((majorCountries.Contains(country) || mijorCountries.Contains(country)) && userMinors.Any())
             {
                 SocketGuildUser newUser = null;
                 do

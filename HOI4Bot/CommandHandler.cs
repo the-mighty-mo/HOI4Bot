@@ -11,7 +11,7 @@ namespace HOI4Bot
     public class CommandHandler
     {
         public const string prefix = "\\";
-        public static int argPos = 0;
+        private static int argPos = 0;
 
         private readonly DiscordSocketClient client;
         private readonly CommandService commands;
@@ -58,11 +58,12 @@ namespace HOI4Bot
         }
 
         private async Task<bool> CanBotRunCommandsAsync(SocketUserMessage msg) => await Task.Run(() => false);
+
         private async Task<bool> ShouldDeleteBotCommands() => await Task.Run(() => true);
 
         private async Task HandleCommandAsync(SocketMessage m)
         {
-            if (!(m is SocketUserMessage msg) || (msg.Author.IsBot && !await CanBotRunCommandsAsync(msg)))
+            if (m is not SocketUserMessage msg || (msg.Author.IsBot && !await CanBotRunCommandsAsync(msg)))
             {
                 return;
             }
