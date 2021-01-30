@@ -6,7 +6,7 @@
     <StartupObject>HOI4Bot.Program</StartupObject>
     <ApplicationIcon>HOI4.ico</ApplicationIcon>
     <Nullable>warnings</Nullable>
-    <Copyright>Copyright © The Mighty Mi® 2020</Copyright>
+    <Copyright>Copyright © The Mighty Mi® 2021</Copyright>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discord.Net" Version="2.2.0" />
+    <PackageReference Include="Discord.Net" Version="2.3.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
   </ItemGroup>
