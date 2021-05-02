@@ -29,7 +29,7 @@ namespace HOI4Bot.Modules
                 return;
             }
 
-            List<string> countries = new List<string>().Concat(majorAllies).Concat(majorAxis).Concat(mijorAllies).Concat(mijorAxis).Concat(minorAllies).Concat(minorAxis).ToList();
+            IEnumerable<string> countries = new List<string>().Concat(majorAllies).Concat(majorAxis).Concat(mijorAllies).Concat(mijorAxis).Concat(minorAllies).Concat(minorAxis);
             if (!countries.Contains(country))
             {
                 EmbedBuilder emb = new EmbedBuilder()
@@ -77,7 +77,7 @@ namespace HOI4Bot.Modules
                 return;
             }
 
-            List<string> countries = new List<string>().Concat(majorAllies).Concat(majorAxis).Concat(mijorAllies).Concat(mijorAxis).Concat(minorAllies).Concat(minorAxis).ToList();
+            IEnumerable<string> countries = new List<string>().Concat(majorAllies).Concat(majorAxis).Concat(mijorAllies).Concat(mijorAxis).Concat(minorAllies).Concat(minorAxis);
             if (!countries.Contains(country))
             {
                 EmbedBuilder emb = new EmbedBuilder()
@@ -241,8 +241,8 @@ namespace HOI4Bot.Modules
                     .WithColor(SecurityInfo.botColor)
                     .WithDescription("Victory to the Allies!");
 
-                List<string> allies = new List<string>().Concat(majorAllies).Concat(mijorAllies).Concat(minorAllies).ToList();
-                List<Task> cmds = new List<Task>()
+                IEnumerable<string> allies = new List<string>().Concat(majorAllies).Concat(mijorAllies).Concat(minorAllies);
+                List<Task> cmds = new()
                 {
                     Context.Channel.SendMessageAsync(embed: embed.Build())
                 };
@@ -265,8 +265,8 @@ namespace HOI4Bot.Modules
                     .WithColor(SecurityInfo.botColor)
                     .WithDescription("Victory to the Axis!");
 
-                List<string> axis = new List<string>().Concat(majorAxis).Concat(mijorAxis).Concat(minorAxis).ToList();
-                List<Task> cmds = new List<Task>()
+                IEnumerable<string> axis = new List<string>().Concat(majorAxis).Concat(mijorAxis).Concat(minorAxis);
+                List<Task> cmds = new()
                 {
                     Context.Channel.SendMessageAsync(embed: embed.Build())
                 };
@@ -313,7 +313,7 @@ namespace HOI4Bot.Modules
                 .WithColor(SecurityInfo.botColor)
                 .WithDescription("The Victory role has been removed from all members.");
 
-            List<Task> cmds = new List<Task>()
+            List<Task> cmds = new()
             {
                 Context.Channel.SendMessageAsync(embed: embed.Build())
             };
@@ -329,7 +329,7 @@ namespace HOI4Bot.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task NewWarAsync()
         {
-            List<Task> cmds = new List<Task>();
+            List<Task> cmds = new();
             foreach (SocketGuildUser user in Context.Guild.Users)
             {
                 string country = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
@@ -462,7 +462,7 @@ namespace HOI4Bot.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task AssignAsync(SocketUser user, [Remainder] string country)
         {
-            List<string> countries = new List<string>().Concat(majorAllies).Concat(majorAxis).Concat(mijorAllies).Concat(mijorAxis).Concat(minorAllies).Concat(minorAxis).ToList();
+            IEnumerable<string> countries = new List<string>().Concat(majorAllies).Concat(majorAxis).Concat(mijorAllies).Concat(mijorAxis).Concat(minorAllies).Concat(minorAxis);
             if (!countries.Contains(country))
             {
                 EmbedBuilder emb = new EmbedBuilder()
@@ -484,7 +484,7 @@ namespace HOI4Bot.Modules
                 .WithColor(SecurityInfo.botColor)
                 .WithDescription($"{user.Mention} has been assigned: {country}.");
 
-            List<Task> cmds = new List<Task>()
+            List<Task> cmds = new()
             {
                 userDatabase.Users.AddUserAsync(user.Id.ToString(), country, Context.Guild.Id.ToString()),
                 Context.Channel.SendMessageAsync(embed: embed.Build())

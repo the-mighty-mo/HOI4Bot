@@ -5,20 +5,16 @@ namespace HOI4Bot
 {
     public static class DatabaseManager
     {
-        public static readonly UserDatabase userDatabase = new UserDatabase();
+        public static readonly UserDatabase userDatabase = new();
 
-        public static async Task InitAsync()
-        {
+        public static async Task InitAsync() =>
             await Task.WhenAll(
                 userDatabase.InitAsync()
             );
-        }
 
-        public static async Task CloseAsync()
-        {
+        public static async Task CloseAsync() =>
             await Task.WhenAll(
                 userDatabase.CloseAsync()
             );
-        }
     }
 }

@@ -11,7 +11,7 @@ namespace HOI4Bot.Databases.UserDatabaseTables
 
         public Task InitAsync()
         {
-            using SqliteCommand cmd = new SqliteCommand("CREATE TABLE IF NOT EXISTS Surrender (country TEXT NOT NULL, guild_id TEXT NOT NULL, UNIQUE(country, guild_id));", connection);
+            using SqliteCommand cmd = new("CREATE TABLE IF NOT EXISTS Surrender (country TEXT NOT NULL, guild_id TEXT NOT NULL, UNIQUE(country, guild_id));", connection);
             return cmd.ExecuteNonQueryAsync();
         }
     }

@@ -7,8 +7,8 @@ namespace HOI4Bot.Databases
 {
     public class UserDatabase
     {
-        private readonly SqliteConnection connection = new SqliteConnection("Filename=Users.db");
-        private readonly Dictionary<System.Type, ITable> tables = new Dictionary<System.Type, ITable>();
+        private readonly SqliteConnection connection = new("Filename=Users.db");
+        private readonly Dictionary<System.Type, ITable> tables = new();
 
         public UsersTable Users => tables[typeof(UsersTable)] as UsersTable;
         public RolesTable Roles => tables[typeof(RolesTable)] as RolesTable;

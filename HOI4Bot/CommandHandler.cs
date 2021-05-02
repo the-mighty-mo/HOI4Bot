@@ -22,7 +22,7 @@ namespace HOI4Bot
             this.client = client;
             this.services = services;
 
-            CommandServiceConfig config = new CommandServiceConfig()
+            CommandServiceConfig config = new()
             {
                 DefaultRunMode = RunMode.Async
             };
@@ -47,15 +47,11 @@ namespace HOI4Bot
             }
         }
 
-        private async Task SendConnectMessage()
-        {
+        private async Task SendConnectMessage() =>
             await Console.Out.WriteLineAsync($"{SecurityInfo.botName} is online");
-        }
 
-        private async Task SendDisconnectError(Exception e)
-        {
+        private async Task SendDisconnectError(Exception e) =>
             await Console.Out.WriteLineAsync(e.Message);
-        }
 
         private async Task<bool> CanBotRunCommandsAsync(SocketUserMessage msg) => await Task.Run(() => false);
 
@@ -68,14 +64,14 @@ namespace HOI4Bot
                 return;
             }
 
-            SocketCommandContext Context = new SocketCommandContext(client, msg);
+            SocketCommandContext Context = new(client, msg);
             bool isCommand = msg.HasMentionPrefix(client.CurrentUser, ref argPos) || msg.HasStringPrefix(prefix, ref argPos);
 
             if (isCommand)
             {
                 var result = await commands.ExecuteAsync(Context, argPos, services);
 
-                List<Task> cmds = new List<Task>();
+                List<Task> cmds = new();
                 if (msg.Author.IsBot && await ShouldDeleteBotCommands())
                 {
                     cmds.Add(msg.DeleteAsync());

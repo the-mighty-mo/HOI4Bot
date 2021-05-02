@@ -82,9 +82,9 @@ namespace HOI4Bot.Modules
                 await Context.Channel.SendMessageAsync(embed: emb.Build());
                 return;
             }
-            List<string> majorCountries = new List<string>().Concat(majorAllies).Concat(majorAxis).ToList();
-            List<string> mijorCountries = new List<string>().Concat(mijorAllies).Concat(mijorAxis).ToList();
-            List<string> minorCountries = new List<string>().Concat(minorAllies).Concat(minorAxis).ToList();
+            IEnumerable<string> majorCountries = new List<string>().Concat(majorAllies).Concat(majorAxis);
+            IEnumerable<string> mijorCountries = new List<string>().Concat(mijorAllies).Concat(mijorAxis);
+            IEnumerable<string> minorCountries = new List<string>().Concat(minorAllies).Concat(minorAxis);
 
             List<string> usedCountries = await userDatabase.Users.GetCountriesAsync(Context.Guild.Id.ToString());
             List<string> availableCountries = majorCountries.Where(x => !usedCountries.Contains(x)).ToList();
@@ -102,7 +102,7 @@ namespace HOI4Bot.Modules
                 .WithColor(SecurityInfo.botColor)
                 .WithDescription($"You have joined the next war as: {country}.");
 
-            List<Task> cmds = new List<Task>()
+            List<Task> cmds = new()
             {
                 userDatabase.Users.AddUserAsync(user.Id.ToString(), country, Context.Guild.Id.ToString()),
                 Context.Channel.SendMessageAsync(embed: embed.Build())
@@ -134,9 +134,9 @@ namespace HOI4Bot.Modules
                 return;
             }
 
-            List<string> majorCountries = new List<string>().Concat(majorAllies).Concat(majorAxis).ToList();
-            List<string> mijorCountries = new List<string>().Concat(mijorAllies).Concat(mijorAxis).ToList();
-            List<string> minorCountries = new List<string>().Concat(minorAllies).Concat(minorAxis).ToList();
+            IEnumerable<string> majorCountries = new List<string>().Concat(majorAllies).Concat(majorAxis);
+            IEnumerable<string> mijorCountries = new List<string>().Concat(mijorAllies).Concat(mijorAxis);
+            IEnumerable<string> minorCountries = new List<string>().Concat(minorAllies).Concat(minorAxis);
 
             string country = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
             Dictionary<string, string> userCountries = await userDatabase.Users.GetUsersAsync(Context.Guild.Id.ToString());
@@ -146,7 +146,7 @@ namespace HOI4Bot.Modules
                 .WithColor(SecurityInfo.botColor)
                 .WithDescription("You have left the next war.");
 
-            List<Task> cmds = new List<Task>()
+            List<Task> cmds = new()
             {
                 userDatabase.Users.RemoveUserAsync(user.Id.ToString(), Context.Guild.Id.ToString()),
                 Context.Channel.SendMessageAsync(embed: embed.Build())
@@ -198,14 +198,14 @@ namespace HOI4Bot.Modules
             }
         }
 
-        [Command("surrender")]
-        public async Task SurrenderAsync()
-        {
-        }
+        //[Command("surrender")]
+        //public async Task SurrenderAsync()
+        //{
+        //}
 
-        [Command("unsurrender")]
-        public async Task UnsurrenderAsync()
-        {
-        }
+        //[Command("unsurrender")]
+        //public async Task UnsurrenderAsync()
+        //{
+        //}
     }
 }
