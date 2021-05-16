@@ -1,4 +1,4 @@
-HOI4Bot/bin/
-HOI4Bot/obj/
+**/bin/
+**/obj/
 .vs/
-*.user
+**.user
