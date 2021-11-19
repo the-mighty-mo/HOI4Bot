@@ -177,7 +177,7 @@ namespace HOI4Bot.Modules
             }
             first = true;
 
-            if (roles.Keys.Contains("iTaLY"))
+            if (roles.ContainsKey("iTaLY"))
             {
                 SocketRole role;
                 if (ulong.TryParse(roles["iTaLY"], out ulong roleId) && (role = Context.Guild.GetRole(roleId)) != null)
@@ -202,7 +202,7 @@ namespace HOI4Bot.Modules
             }
             first = true;
 
-            if (roles.Keys.Contains("Victory"))
+            if (roles.ContainsKey("Victory"))
             {
                 SocketRole role;
                 if (ulong.TryParse(roles["Victory"], out ulong roleId) && (role = Context.Guild.GetRole(roleId)) != null)
@@ -426,7 +426,7 @@ namespace HOI4Bot.Modules
             }
             first = true;
 
-            if (users.Values.Contains("iTaLY"))
+            if (users.ContainsValue("iTaLY"))
             {
                 SocketUser user;
                 if (ulong.TryParse(users.First(x => x.Value == "iTaLY").Key, out ulong userId) && (user = Context.Guild.GetUser(userId)) != null)
