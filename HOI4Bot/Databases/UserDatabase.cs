@@ -23,7 +23,6 @@ namespace HOI4Bot.Databases
 
         public async Task InitAsync()
         {
-            await connection.OpenAsync();
             IEnumerable<Task> GetTableInits()
             {
                 foreach (var table in tables.Values)
@@ -31,9 +30,10 @@ namespace HOI4Bot.Databases
                     yield return table.InitAsync();
                 }
             }
+            await connection.OpenAsync();
             await Task.WhenAll(GetTableInits());
         }
 
-        public async Task CloseAsync() => await connection.CloseAsync();
+        public Task CloseAsync() => connection.CloseAsync();
     }
 }

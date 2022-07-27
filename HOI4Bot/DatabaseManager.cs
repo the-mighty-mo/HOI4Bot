@@ -7,13 +7,13 @@ namespace HOI4Bot
     {
         public static readonly UserDatabase userDatabase = new();
 
-        public static async Task InitAsync() =>
-            await Task.WhenAll(
+        public static Task InitAsync() =>
+            Task.WhenAll(
                 userDatabase.InitAsync()
             );
 
-        public static async Task CloseAsync() =>
-            await Task.WhenAll(
+        public static Task CloseAsync() =>
+            Task.WhenAll(
                 userDatabase.CloseAsync()
             );
     }
