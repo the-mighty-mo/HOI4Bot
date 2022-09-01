@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HOI4Bot.Modules
@@ -13,13 +14,7 @@ namespace HOI4Bot.Modules
                 .WithColor(SecurityInfo.botColor)
                 .WithTitle(SecurityInfo.botName);
 
-            EmbedFieldBuilder prefix = new EmbedFieldBuilder()
-                .WithIsInline(false)
-                .WithName("Prefix")
-                .WithValue("\\" +
-                    "\n**or**\n" +
-                    Context.Client.CurrentUser.Mention + "\n\u200b");
-            embed.AddField(prefix);
+            List<EmbedFieldBuilder> fields = new();
 
             EmbedFieldBuilder commands = new EmbedFieldBuilder()
                 .WithIsInline(false)
@@ -34,7 +29,7 @@ namespace HOI4Bot.Modules
                     "opt-out [user mention (admin only)]\n" +
                     "  - Leaves the next war\n\u200b"
                 );
-            embed.AddField(commands);
+            fields.Add(commands);
 
             EmbedFieldBuilder admin = new EmbedFieldBuilder()
                 .WithIsInline(false)
@@ -57,9 +52,10 @@ namespace HOI4Bot.Modules
                     "assign [user mention] [country]\n" +
                     "  - Assigns a user to a specific country"
                 );
-            embed.AddField(admin);
+            fields.Add(admin);
+            embed.WithFields(fields);
 
-            await Context.Interaction.RespondAsync(embed: embed.Build());
+            await Context.Interaction.RespondAsync(embed: embed.Build(), ephemeral: true);
         }
     }
 }

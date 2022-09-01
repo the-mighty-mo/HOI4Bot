@@ -100,7 +100,7 @@ namespace HOI4Bot
 
             SocketInteractionContext Context = new(client, m);
 
-            var result = await interactions.ExecuteCommandAsync(Context, services);
+            await interactions.ExecuteCommandAsync(Context, services);
 
             List<Task> cmds = new();
             if (m.User.IsBot && await ShouldDeleteBotCommands())
