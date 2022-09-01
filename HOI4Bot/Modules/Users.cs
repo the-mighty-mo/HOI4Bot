@@ -64,9 +64,11 @@ namespace HOI4Bot.Modules
         }
 
         [SlashCommand("opt-in", "Joins the next war")]
+        [RequireContext(ContextType.Guild)]
         public async Task OptInAsync() => await OptInAsync(Context.User);
 
         [SlashCommand("admin-opt-in", "Joins the next war")]
+        [RequireContext(ContextType.Guild)]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task OptInAsync(SocketUser user)
         {
@@ -120,9 +122,11 @@ namespace HOI4Bot.Modules
         }
 
         [SlashCommand("opt-out", "Leaves the next war")]
+        [RequireContext(ContextType.Guild)]
         public async Task OptOutAsync() => await OptOutAsync(Context.User);
 
         [SlashCommand("admin-opt-out", "Leaves the next war")]
+        [RequireContext(ContextType.Guild)]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task OptOutAsync(SocketUser user)
         {

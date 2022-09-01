@@ -60,9 +60,16 @@ namespace HOI4Bot
 
         private async Task SendInteractionErrorAsync(SlashCommandInfo info, IInteractionContext context, Discord.Interactions.IResult result)
         {
-            if (!result.IsSuccess && info.RunMode == Discord.Interactions.RunMode.Async && result.Error is not (InteractionCommandError.UnknownCommand or InteractionCommandError.UnmetPrecondition))
+            if (!result.IsSuccess && info.RunMode == Discord.Interactions.RunMode.Async && result.Error is not InteractionCommandError.UnknownCommand)
             {
-                await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}");
+                if (result.Error is InteractionCommandError.UnmetPrecondition)
+                {
+                    await context.Interaction.RespondAsync($"Error: {result.ErrorReason}");
+                }
+                else
+                {
+                    await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}");
+                }
             }
         }
 
@@ -99,10 +106,6 @@ namespace HOI4Bot
             if (m.User.IsBot && await ShouldDeleteBotCommands())
             {
                 cmds.Add(m.DeleteOriginalResponseAsync());
-            }
-            else if (!result.IsSuccess && result.Error == InteractionCommandError.UnmetPrecondition)
-            {
-                cmds.Add(Context.Channel.SendMessageAsync(result.ErrorReason));
             }
 
             await Task.WhenAll(cmds);
