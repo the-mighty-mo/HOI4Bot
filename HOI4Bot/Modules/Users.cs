@@ -1,5 +1,5 @@
 ﻿using Discord;
-using Discord.Commands;
+using Discord.Interactions;
 using Discord.WebSocket;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +9,9 @@ using static HOI4Bot.DatabaseManager;
 
 namespace HOI4Bot.Modules
 {
-    public class Users : ModuleBase<SocketCommandContext>
+    public class Users : InteractionModuleBase<SocketInteractionContext>
     {
-        [Command("countries")]
+        [SlashCommand("countries", "Displays a list of valid countries")]
         public async Task CountriesAsync()
         {
             EmbedBuilder embed = new EmbedBuilder()
@@ -60,16 +60,18 @@ namespace HOI4Bot.Modules
                 .WithValue(axis);
             embed.AddField(axisField);
 
-            await Context.Channel.SendMessageAsync(embed: embed.Build());
+            await Context.Interaction.RespondAsync(embed: embed.Build());
         }
 
-        [Command("opt-in")]
+        [SlashCommand("opt-in", "Joins the next war")]
         public async Task OptInAsync() => await OptInAsync(Context.User);
 
-        [Command("opt-in")]
+        [SlashCommand("admin-opt-in", "Joins the next war")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task OptInAsync(SocketUser user)
         {
+            user ??= Context.User;
+
             string country;
             if (await userDatabase.Users.IsUserAsync(user.Id.ToString(), Context.Guild.Id.ToString()))
             {
@@ -79,7 +81,7 @@ namespace HOI4Bot.Modules
                     .WithColor(SecurityInfo.botColor)
                     .WithDescription($"You are already part of the next war as: {country}.");
 
-                await Context.Channel.SendMessageAsync(embed: emb.Build());
+                await Context.Interaction.RespondAsync(embed: emb.Build());
                 return;
             }
             IEnumerable<string> majorCountries = new List<string>().Concat(majorAllies).Concat(majorAxis);
@@ -105,7 +107,7 @@ namespace HOI4Bot.Modules
             List<Task> cmds = new()
             {
                 userDatabase.Users.AddUserAsync(user.Id.ToString(), country, Context.Guild.Id.ToString()),
-                Context.Channel.SendMessageAsync(embed: embed.Build())
+                Context.Interaction.RespondAsync(embed: embed.Build())
             };
 
             SocketRole role;
@@ -117,10 +119,10 @@ namespace HOI4Bot.Modules
             await Task.WhenAll(cmds);
         }
 
-        [Command("opt-out")]
+        [SlashCommand("opt-out", "Leaves the next war")]
         public async Task OptOutAsync() => await OptOutAsync(Context.User);
 
-        [Command("opt-out")]
+        [SlashCommand("admin-opt-out", "Leaves the next war")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task OptOutAsync(SocketUser user)
         {
@@ -130,7 +132,7 @@ namespace HOI4Bot.Modules
                     .WithColor(SecurityInfo.botColor)
                     .WithDescription("You are already out of the next war.");
 
-                await Context.Channel.SendMessageAsync(embed: emb.Build());
+                await Context.Interaction.RespondAsync(embed: emb.Build());
                 return;
             }
 
@@ -149,7 +151,7 @@ namespace HOI4Bot.Modules
             List<Task> cmds = new()
             {
                 userDatabase.Users.RemoveUserAsync(user.Id.ToString(), Context.Guild.Id.ToString()),
-                Context.Channel.SendMessageAsync(embed: embed.Build())
+                Context.Interaction.RespondAsync(embed: embed.Build())
             };
 
             SocketRole role;
@@ -186,7 +188,7 @@ namespace HOI4Bot.Modules
 
                 await Task.WhenAll
                 (
-                    Context.Channel.SendMessageAsync(embed: takeover.Build()),
+                    Context.Interaction.RespondAsync(embed: takeover.Build()),
                     userDatabase.Users.AddUserAsync(newUser.Id.ToString(), country, Context.Guild.Id.ToString())
                 );
 

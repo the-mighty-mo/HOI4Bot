@@ -1,12 +1,12 @@
 ﻿using Discord;
-using Discord.Commands;
+using Discord.Interactions;
 using System.Threading.Tasks;
 
 namespace HOI4Bot.Modules
 {
-    public class Help : ModuleBase<SocketCommandContext>
+    public class Help : InteractionModuleBase<SocketInteractionContext>
     {
-        [Command("help")]
+        [SlashCommand("help", "List of commands")]
         public async Task HelpAsync()
         {
             EmbedBuilder embed = new EmbedBuilder()
@@ -44,6 +44,8 @@ namespace HOI4Bot.Modules
                     "  - Sets the role for the country or the Victory role\n\n" +
                     "remove-role [country]\n" +
                     "  - Removes any role assigned to the country or the Victory role\n\n" +
+                    "view-roles\n" +
+                    "  - Views the roles currently used for countries and the Victory role\n\n" +
                     "victory [alliance]\n" +
                     "  - Gives the winning alliance the Victory role\n\n" +
                     "clear-victory\n" +
@@ -57,7 +59,7 @@ namespace HOI4Bot.Modules
                 );
             embed.AddField(admin);
 
-            await Context.Channel.SendMessageAsync(embed: embed.Build());
+            await Context.Interaction.RespondAsync(embed: embed.Build());
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using Discord;
-using Discord.Commands;
+using Discord.Interactions;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
@@ -10,11 +10,11 @@ using static HOI4Bot.DatabaseManager;
 
 namespace HOI4Bot.Modules
 {
-    public class Admin : ModuleBase<SocketCommandContext>
+    public class Admin : InteractionModuleBase<SocketInteractionContext>
     {
-        [Command("add-role")]
+        [SlashCommand("add-role", "Sets the role for the country or the Victory role")]
         [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task AddRoleAsync(SocketRole role, [Remainder] string country)
+        public async Task AddRoleAsync(SocketRole role, string country)
         {
             if (country.ToLower() == "victory")
             {
@@ -60,9 +60,9 @@ namespace HOI4Bot.Modules
             );
         }
 
-        [Command("remove-role")]
+        [SlashCommand("remove-role", "Removes any role assigned to the country or the Victory role")]
         [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task RemoveRoleAsync([Remainder] string country)
+        public async Task RemoveRoleAsync(string country)
         {
             if (country.ToLower() == "victory")
             {
@@ -108,7 +108,7 @@ namespace HOI4Bot.Modules
             );
         }
 
-        [Command("view-roles")]
+        [SlashCommand("view-roles", "Views the roles currently used for countries and the Victory role")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task ViewRolesAsync()
         {
@@ -219,7 +219,7 @@ namespace HOI4Bot.Modules
             await Context.Channel.SendMessageAsync(roleInfo);
         }
 
-        [Command("victory")]
+        [SlashCommand("victory", "Gives the winning alliance the Victory role")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task VictoryAsync(string alliance)
         {
@@ -293,7 +293,7 @@ namespace HOI4Bot.Modules
             }
         }
 
-        [Command("clear-victory")]
+        [SlashCommand("clear-victory", "Removes the Victory role from all members")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task ClearVictoryAsync()
         {
@@ -325,7 +325,7 @@ namespace HOI4Bot.Modules
             await Task.WhenAll(cmds);
         }
 
-        [Command("new-war")]
+        [SlashCommand("new-war", "Creates a new war")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task NewWarAsync()
         {
@@ -357,7 +357,7 @@ namespace HOI4Bot.Modules
             );
         }
 
-        [Command("view-war")]
+        [SlashCommand("view-war", "Displays the war info")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task ViewWarAsync()
         {
@@ -458,9 +458,9 @@ namespace HOI4Bot.Modules
             await Context.Channel.SendMessageAsync(userInfo);
         }
 
-        [Command("assign")]
+        [SlashCommand("assign", "Assigns a user to a specific country")]
         [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task AssignAsync(SocketUser user, [Remainder] string country)
+        public async Task AssignAsync(SocketUser user, string country)
         {
             IEnumerable<string> countries = new List<string>().Concat(majorAllies).Concat(majorAxis).Concat(mijorAllies).Concat(mijorAxis).Concat(minorAllies).Concat(minorAxis);
             if (!countries.Contains(country))

@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.Interactions;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace HOI4Bot
 
         private readonly DiscordSocketClient client;
         private readonly CommandService commands;
+        private readonly InteractionService interactions;
         private readonly IServiceProvider services;
 
         public CommandHandler(DiscordSocketClient client, IServiceProvider services)
@@ -22,26 +24,51 @@ namespace HOI4Bot
             this.client = client;
             this.services = services;
 
-            CommandServiceConfig config = new()
+            InteractionServiceConfig interactionCfg = new()
             {
-                DefaultRunMode = RunMode.Async
+                DefaultRunMode = Discord.Interactions.RunMode.Async
             };
-            commands = new CommandService(config);
+            interactions = new(client.Rest, interactionCfg);
+
+            CommandServiceConfig commandCfg = new()
+            {
+                DefaultRunMode = Discord.Commands.RunMode.Async
+            };
+            commands = new(commandCfg);
         }
 
         public async Task InitCommandsAsync()
         {
+            client.Ready += ReadyAsync;
             client.Connected += SendConnectMessage;
             client.Disconnected += SendDisconnectError;
             client.MessageReceived += HandleCommandAsync;
+            client.SlashCommandExecuted += HandleSlashCommandAsync;
 
-            await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
-            commands.CommandExecuted += SendErrorAsync;
+            await Task.WhenAll(
+                interactions.AddModulesAsync(Assembly.GetEntryAssembly(), services),
+                commands.AddModulesAsync(Assembly.GetEntryAssembly(), services)
+            );
+            interactions.SlashCommandExecuted += SendInteractionErrorAsync;
+            commands.CommandExecuted += SendCommandErrorAsync;
         }
 
-        private async Task SendErrorAsync(Optional<CommandInfo> info, ICommandContext context, IResult result)
+        private async Task ReadyAsync()
         {
-            if (!result.IsSuccess && info.GetValueOrDefault()?.RunMode == RunMode.Async && result.Error is not (CommandError.UnknownCommand or CommandError.UnmetPrecondition))
+            await interactions.RegisterCommandsGloballyAsync(true);
+        }
+
+        private async Task SendInteractionErrorAsync(SlashCommandInfo info, IInteractionContext context, Discord.Interactions.IResult result)
+        {
+            if (!result.IsSuccess && info.RunMode == Discord.Interactions.RunMode.Async && result.Error is not (InteractionCommandError.UnknownCommand or InteractionCommandError.UnmetPrecondition))
+            {
+                await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}");
+            }
+        }
+
+        private async Task SendCommandErrorAsync(Optional<CommandInfo> info, ICommandContext context, Discord.Commands.IResult result)
+        {
+            if (!result.IsSuccess && info.GetValueOrDefault()?.RunMode == Discord.Commands.RunMode.Async && result.Error is not (CommandError.UnknownCommand or CommandError.UnmetPrecondition))
             {
                 await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}");
             }
@@ -53,13 +80,37 @@ namespace HOI4Bot
         private Task SendDisconnectError(Exception e) =>
             Console.Out.WriteLineAsync(e.Message);
 
-        private Task<bool> CanBotRunCommandsAsync(SocketUserMessage msg) => Task.Run(() => false);
+        private static Task<bool> CanBotRunCommandsAsync(SocketUser usr) => Task.Run(() => false);
 
-        private Task<bool> ShouldDeleteBotCommands() => Task.Run(() => true);
+        private static Task<bool> ShouldDeleteBotCommands() => Task.Run(() => true);
+
+        private async Task HandleSlashCommandAsync(SocketSlashCommand m)
+        {
+            if (m.User.IsBot && !await CanBotRunCommandsAsync(m.User))
+            {
+                return;
+            }
+
+            SocketInteractionContext Context = new(client, m);
+
+            var result = await interactions.ExecuteCommandAsync(Context, services);
+
+            List<Task> cmds = new();
+            if (m.User.IsBot && await ShouldDeleteBotCommands())
+            {
+                cmds.Add(m.DeleteOriginalResponseAsync());
+            }
+            else if (!result.IsSuccess && result.Error == InteractionCommandError.UnmetPrecondition)
+            {
+                cmds.Add(Context.Channel.SendMessageAsync(result.ErrorReason));
+            }
+
+            await Task.WhenAll(cmds);
+        }
 
         private async Task HandleCommandAsync(SocketMessage m)
         {
-            if (m is not SocketUserMessage msg || (msg.Author.IsBot && !await CanBotRunCommandsAsync(msg)))
+            if (m is not SocketUserMessage msg || (msg.Author.IsBot && !await CanBotRunCommandsAsync(msg.Author)))
             {
                 return;
             }
