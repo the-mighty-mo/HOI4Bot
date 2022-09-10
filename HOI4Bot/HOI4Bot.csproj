@@ -5,7 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <StartupObject>HOI4Bot.Program</StartupObject>
     <ApplicationIcon>HOI4.ico</ApplicationIcon>
-    <Nullable>warnings</Nullable>
+    <Nullable>enable</Nullable>
     <Copyright>Copyright © The Mighty Mi® 2021</Copyright>
   </PropertyGroup>
 

@@ -79,7 +79,11 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             SqliteDataReader reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                countries.Add(reader["country"].ToString());
+                string? country = reader["country"].ToString();
+                if (country != null)
+                {
+                    countries.Add(country);
+                }
             }
 
             return countries;
@@ -97,15 +101,20 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             SqliteDataReader reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                users.Add(reader["user_id"].ToString(), reader["country"].ToString());
+                string? userId = reader["user_id"].ToString();
+                string? country = reader["country"].ToString();
+                if (userId != null && country != null)
+                {
+                    users.Add(userId, country);
+                }
             }
 
             return users;
         }
 
-        public async Task<string> GetCountryAsync(string userId, string guildId)
+        public async Task<string?> GetCountryAsync(string userId, string guildId)
         {
-            string country = default;
+            string? country = default;
 
             string getCountry = "SELECT country FROM Users WHERE user_id = @user_id AND guild_id = @guild_id;";
 

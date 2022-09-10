@@ -74,14 +74,13 @@ namespace HOI4Bot.Modules
         {
             user ??= Context.User;
 
-            string country;
             if (await userDatabase.Users.IsUserAsync(user.Id.ToString(), Context.Guild.Id.ToString()))
             {
-                country = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
+                string? curCountry = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
 
                 EmbedBuilder emb = new EmbedBuilder()
                     .WithColor(SecurityInfo.botColor)
-                    .WithDescription($"You are already part of the next war as: {country}.");
+                    .WithDescription($"You are already part of the next war as: {curCountry}.");
 
                 await Context.Interaction.RespondAsync(embed: emb.Build());
                 return;
@@ -100,7 +99,7 @@ namespace HOI4Bot.Modules
                     availableCountries = minorCountries.Where(x => !usedCountries.Contains(x)).ToList();
                 }
             }
-            country = availableCountries[random.Next(0, availableCountries.Count)];
+            string country = availableCountries[random.Next(0, availableCountries.Count)];
 
             EmbedBuilder embed = new EmbedBuilder()
                 .WithColor(SecurityInfo.botColor)
@@ -144,7 +143,7 @@ namespace HOI4Bot.Modules
             IEnumerable<string> mijorCountries = new List<string>().Concat(mijorAllies).Concat(mijorAxis);
             IEnumerable<string> minorCountries = new List<string>().Concat(minorAllies).Concat(minorAxis);
 
-            string country = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
+            string? country = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
             Dictionary<string, string> userCountries = await userDatabase.Users.GetUsersAsync(Context.Guild.Id.ToString());
             IEnumerable<string> userMinors = userCountries.Values.Where(x => minorCountries.Contains(x));
 
@@ -159,16 +158,16 @@ namespace HOI4Bot.Modules
             };
 
             SocketRole role;
-            if (ulong.TryParse(await userDatabase.Roles.GetRoleAsync(country, Context.Guild.Id.ToString()), out ulong roleId) && (role = Context.Guild.GetRole(roleId)) != null)
+            if (country != null && ulong.TryParse(await userDatabase.Roles.GetRoleAsync(country, Context.Guild.Id.ToString()), out ulong roleId) && (role = Context.Guild.GetRole(roleId)) != null)
             {
                 cmds.Add(Context.Guild.GetUser(user.Id).RemoveRoleAsync(role));
             }
 
             await Task.WhenAll(cmds);
 
-            if ((majorCountries.Contains(country) || mijorCountries.Contains(country)) && userMinors.Any())
+            if (country != null && (majorCountries.Contains(country) || mijorCountries.Contains(country)) && userMinors.Any())
             {
-                SocketGuildUser newUser = null;
+                SocketGuildUser? newUser = null;
                 do
                 {
                     int i = userCountries.Values.ToList().IndexOf(userMinors.ElementAt(random.Next(0, userMinors.Count())));

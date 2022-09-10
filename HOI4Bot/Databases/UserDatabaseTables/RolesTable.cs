@@ -56,9 +56,9 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             return hasCountry;
         }
 
-        public async Task<string> GetRoleAsync(string country, string guildId)
+        public async Task<string?> GetRoleAsync(string country, string guildId)
         {
-            string roleId = null;
+            string? roleId = null;
 
             string getRole = "SELECT role_id FROM Roles WHERE country = @country AND guild_id = @guild_id;";
 
@@ -87,7 +87,12 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             SqliteDataReader reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                roles.Add(reader["country"].ToString(), reader["role_id"].ToString());
+                string? country = reader["country"].ToString();
+                string? roleId = reader["role_id"].ToString();
+                if (country != null && roleId != null)
+                {
+                    roles.Add(country, roleId);
+                }
             }
 
             return roles;

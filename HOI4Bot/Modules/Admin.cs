@@ -224,7 +224,7 @@ namespace HOI4Bot.Modules
         [RequireContext(ContextType.Guild)]
         public async Task VictoryAsync(string alliance)
         {
-            string roleStr = await userDatabase.Roles.GetRoleAsync("Victory", Context.Guild.Id.ToString());
+            string? roleStr = await userDatabase.Roles.GetRoleAsync("Victory", Context.Guild.Id.ToString());
             SocketRole role;
             if (!ulong.TryParse(roleStr, out ulong roleId) || (role = Context.Guild.GetRole(roleId)) == null)
             {
@@ -298,7 +298,7 @@ namespace HOI4Bot.Modules
         [RequireContext(ContextType.Guild)]
         public async Task ClearVictoryAsync()
         {
-            string roleStr = await userDatabase.Roles.GetRoleAsync("Victory", Context.Guild.Id.ToString());
+            string? roleStr = await userDatabase.Roles.GetRoleAsync("Victory", Context.Guild.Id.ToString());
             SocketRole role;
             if (!ulong.TryParse(roleStr, out ulong roleId) || (role = Context.Guild.GetRole(roleId)) == null)
             {
@@ -333,7 +333,7 @@ namespace HOI4Bot.Modules
             List<Task> cmds = new();
             foreach (SocketGuildUser user in Context.Guild.Users)
             {
-                string country = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
+                string? country = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
                 if (country == default)
                 {
                     continue;
@@ -475,7 +475,7 @@ namespace HOI4Bot.Modules
             }
 
             SocketRole oldRole;
-            string oldCountry = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
+            string? oldCountry = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
             if (oldCountry != default && ulong.TryParse(await userDatabase.Roles.GetRoleAsync(oldCountry, Context.Guild.Id.ToString()), out ulong oldRoleId) && (oldRole = Context.Guild.GetRole(oldRoleId)) != null)
             {
                 await Context.Guild.GetUser(user.Id).RemoveRoleAsync(oldRole);
