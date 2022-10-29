@@ -16,7 +16,7 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             return cmd.ExecuteNonQueryAsync();
         }
 
-        public async Task AddUserAsync(string userId, string country, string guildId)
+        public Task AddUserAsync(string userId, string country, string guildId)
         {
             string update = "UPDATE Users SET country = @country WHERE user_id = @user_id AND guild_id = @guild_id;";
             string insert = "INSERT INTO Users (user_id, country, guild_id) SELECT @user_id, @country, @guild_id WHERE (SELECT Changes() = 0);";
@@ -26,10 +26,10 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             cmd.Parameters.AddWithValue("@country", country);
             cmd.Parameters.AddWithValue("@guild_id", guildId);
 
-            await cmd.ExecuteNonQueryAsync();
+            return cmd.ExecuteNonQueryAsync();
         }
 
-        public async Task RemoveUserAsync(string userId, string guildId)
+        public Task RemoveUserAsync(string userId, string guildId)
         {
             string delete = "DELETE FROM Users WHERE user_id = @user_id AND guild_id = @guild_id;";
 
@@ -37,7 +37,7 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             cmd.Parameters.AddWithValue("@user_id", userId);
             cmd.Parameters.AddWithValue("@guild_id", guildId);
 
-            await cmd.ExecuteNonQueryAsync();
+            return cmd.ExecuteNonQueryAsync();
         }
 
         public async Task<bool> IsUserAsync(string userId, string guildId)
@@ -50,21 +50,21 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             cmd.Parameters.AddWithValue("@user_id", userId);
             cmd.Parameters.AddWithValue("@guild_id", guildId);
 
-            SqliteDataReader reader = await cmd.ExecuteReaderAsync();
-            hasUser = await reader.ReadAsync();
+            SqliteDataReader reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+            hasUser = await reader.ReadAsync().ConfigureAwait(false);
             reader.Close();
 
             return hasUser;
         }
 
-        public async Task ClearUserAsync(string guildId)
+        public Task ClearUserAsync(string guildId)
         {
             string delete = "DELETE FROM Users WHERE guild_id = @guild_id;";
 
             using SqliteCommand cmd = new(delete, connection);
             cmd.Parameters.AddWithValue("@guild_id", guildId);
 
-            await cmd.ExecuteNonQueryAsync();
+            return cmd.ExecuteNonQueryAsync();
         }
 
         public async Task<List<string>> GetCountriesAsync(string guildId)
@@ -76,8 +76,8 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             using SqliteCommand cmd = new(getCountries, connection);
             cmd.Parameters.AddWithValue("@guild_id", guildId);
 
-            SqliteDataReader reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            SqliteDataReader reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+            while (await reader.ReadAsync().ConfigureAwait(false))
             {
                 string? country = reader["country"].ToString();
                 if (country != null)
@@ -98,8 +98,8 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             using SqliteCommand cmd = new(getUsers, connection);
             cmd.Parameters.AddWithValue("@guild_id", guildId);
 
-            SqliteDataReader reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            SqliteDataReader reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+            while (await reader.ReadAsync().ConfigureAwait(false))
             {
                 string? userId = reader["user_id"].ToString();
                 string? country = reader["country"].ToString();
@@ -122,8 +122,8 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             cmd.Parameters.AddWithValue("@user_id", userId);
             cmd.Parameters.AddWithValue("@guild_id", guildId);
 
-            SqliteDataReader reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            SqliteDataReader reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+            if (await reader.ReadAsync().ConfigureAwait(false))
             {
                 country = reader["country"].ToString();
             }

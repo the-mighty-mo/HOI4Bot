@@ -48,15 +48,13 @@ namespace HOI4Bot
             await Task.WhenAll(
                 interactions.AddModulesAsync(Assembly.GetEntryAssembly(), services),
                 commands.AddModulesAsync(Assembly.GetEntryAssembly(), services)
-            );
+            ).ConfigureAwait(false);
             interactions.SlashCommandExecuted += SendInteractionErrorAsync;
             commands.CommandExecuted += SendCommandErrorAsync;
         }
 
-        private async Task ReadyAsync()
-        {
-            await interactions.RegisterCommandsGloballyAsync(true);
-        }
+        private Task ReadyAsync() =>
+            interactions.RegisterCommandsGloballyAsync(true);
 
         private async Task SendInteractionErrorAsync(SlashCommandInfo info, IInteractionContext context, Discord.Interactions.IResult result)
         {
@@ -64,11 +62,11 @@ namespace HOI4Bot
             {
                 if (result.Error is InteractionCommandError.UnmetPrecondition)
                 {
-                    await context.Interaction.RespondAsync($"Error: {result.ErrorReason}");
+                    await context.Interaction.RespondAsync($"Error: {result.ErrorReason}").ConfigureAwait(false);
                 }
                 else
                 {
-                    await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}");
+                    await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}").ConfigureAwait(false);
                 }
             }
         }
@@ -77,7 +75,7 @@ namespace HOI4Bot
         {
             if (!result.IsSuccess && info.GetValueOrDefault()?.RunMode == Discord.Commands.RunMode.Async && result.Error is not (CommandError.UnknownCommand or CommandError.UnmetPrecondition))
             {
-                await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}");
+                await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}").ConfigureAwait(false);
             }
         }
 
@@ -93,27 +91,27 @@ namespace HOI4Bot
 
         private async Task HandleSlashCommandAsync(SocketSlashCommand m)
         {
-            if (m.User.IsBot && !await CanBotRunCommandsAsync(m.User))
+            if (m.User.IsBot && !await CanBotRunCommandsAsync(m.User).ConfigureAwait(false))
             {
                 return;
             }
 
             SocketInteractionContext Context = new(client, m);
 
-            await interactions.ExecuteCommandAsync(Context, services);
+            await interactions.ExecuteCommandAsync(Context, services).ConfigureAwait(false);
 
             List<Task> cmds = new();
-            if (m.User.IsBot && await ShouldDeleteBotCommands())
+            if (m.User.IsBot && await ShouldDeleteBotCommands().ConfigureAwait(false))
             {
                 cmds.Add(m.DeleteOriginalResponseAsync());
             }
 
-            await Task.WhenAll(cmds);
+            await Task.WhenAll(cmds).ConfigureAwait(false);
         }
 
         private async Task HandleCommandAsync(SocketMessage m)
         {
-            if (m is not SocketUserMessage msg || (msg.Author.IsBot && !await CanBotRunCommandsAsync(msg.Author)))
+            if (m is not SocketUserMessage msg || (msg.Author.IsBot && !await CanBotRunCommandsAsync(msg.Author).ConfigureAwait(false)))
             {
                 return;
             }
@@ -123,10 +121,10 @@ namespace HOI4Bot
 
             if (isCommand)
             {
-                var result = await commands.ExecuteAsync(Context, argPos, services);
+                var result = await commands.ExecuteAsync(Context, argPos, services).ConfigureAwait(false);
 
                 List<Task> cmds = new();
-                if (msg.Author.IsBot && await ShouldDeleteBotCommands())
+                if (msg.Author.IsBot && await ShouldDeleteBotCommands().ConfigureAwait(false))
                 {
                     cmds.Add(msg.DeleteAsync());
                 }
@@ -135,7 +133,7 @@ namespace HOI4Bot
                     cmds.Add(Context.Channel.SendMessageAsync(result.ErrorReason));
                 }
 
-                await Task.WhenAll(cmds);
+                await Task.WhenAll(cmds).ConfigureAwait(false);
             }
         }
     }

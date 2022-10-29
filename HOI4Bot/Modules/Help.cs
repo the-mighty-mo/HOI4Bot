@@ -8,7 +8,7 @@ namespace HOI4Bot.Modules
     public class Help : InteractionModuleBase<SocketInteractionContext>
     {
         [SlashCommand("help", "List of commands")]
-        public async Task HelpAsync()
+        public Task HelpAsync()
         {
             EmbedBuilder embed = new EmbedBuilder()
                 .WithColor(SecurityInfo.botColor)
@@ -55,7 +55,7 @@ namespace HOI4Bot.Modules
             fields.Add(admin);
             embed.WithFields(fields);
 
-            await Context.Interaction.RespondAsync(embed: embed.Build(), ephemeral: true);
+            return Context.Interaction.RespondAsync(embed: embed.Build(), ephemeral: true);
         }
     }
 }

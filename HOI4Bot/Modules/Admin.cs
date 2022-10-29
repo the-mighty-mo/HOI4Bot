@@ -26,28 +26,28 @@ namespace HOI4Bot.Modules
                 await Task.WhenAll(
                     userDatabase.Roles.AddRoleAsync("Victory", role.Id.ToString(), Context.Guild.Id.ToString()),
                     Context.Channel.SendMessageAsync(embed: emb.Build())
-                );
+                ).ConfigureAwait(false);
                 return;
             }
 
-            IEnumerable<string> countries = new List<string>().Concat(majorAllies).Concat(majorAxis).Concat(mijorAllies).Concat(mijorAxis).Concat(minorAllies).Concat(minorAxis);
+            IEnumerable<string> countries = majorAllies.Concat(majorAxis).Concat(mijorAllies).Concat(mijorAxis).Concat(minorAllies).Concat(minorAxis);
             if (!countries.Contains(country))
             {
                 EmbedBuilder emb = new EmbedBuilder()
                     .WithColor(SecurityInfo.botColor)
                     .WithDescription($"{country} is not a valid country.");
 
-                await Context.Channel.SendMessageAsync(embed: emb.Build());
+                await Context.Channel.SendMessageAsync(embed: emb.Build()).ConfigureAwait(false);
                 return;
             }
 
-            if (await userDatabase.Roles.GetRoleAsync(country, Context.Guild.Id.ToString()) == role.Id.ToString())
+            if (await userDatabase.Roles.GetRoleAsync(country, Context.Guild.Id.ToString()).ConfigureAwait(false) == role.Id.ToString())
             {
                 EmbedBuilder emb = new EmbedBuilder()
                     .WithColor(SecurityInfo.botColor)
                     .WithDescription($"{role.Mention} is already assigned to: {country}.");
 
-                await Context.Channel.SendMessageAsync(embed: emb.Build());
+                await Context.Channel.SendMessageAsync(embed: emb.Build()).ConfigureAwait(false);
                 return;
             }
 
@@ -58,7 +58,7 @@ namespace HOI4Bot.Modules
             await Task.WhenAll(
                 userDatabase.Roles.AddRoleAsync(country, role.Id.ToString(), Context.Guild.Id.ToString()),
                 Context.Channel.SendMessageAsync(embed: embed.Build())
-            );
+            ).ConfigureAwait(false);
         }
 
         [SlashCommand("remove-role", "Removes any role assigned to the country or the Victory role")]
@@ -74,28 +74,28 @@ namespace HOI4Bot.Modules
                 await Task.WhenAll(
                     userDatabase.Roles.RemoveRoleAsync("Victory", Context.Guild.Id.ToString()),
                     Context.Channel.SendMessageAsync(embed: emb.Build())
-                );
+                ).ConfigureAwait(false);
                 return;
             }
 
-            IEnumerable<string> countries = new List<string>().Concat(majorAllies).Concat(majorAxis).Concat(mijorAllies).Concat(mijorAxis).Concat(minorAllies).Concat(minorAxis);
+            IEnumerable<string> countries = majorAllies.Concat(majorAxis).Concat(mijorAllies).Concat(mijorAxis).Concat(minorAllies).Concat(minorAxis);
             if (!countries.Contains(country))
             {
                 EmbedBuilder emb = new EmbedBuilder()
                     .WithColor(SecurityInfo.botColor)
                     .WithDescription($"{country} is not a valid country.");
 
-                await Context.Channel.SendMessageAsync(embed: emb.Build());
+                await Context.Channel.SendMessageAsync(embed: emb.Build()).ConfigureAwait(false);
                 return;
             }
 
-            if (!await userDatabase.Roles.IsCountryAsync(country, Context.Guild.Id.ToString()))
+            if (!await userDatabase.Roles.IsCountryAsync(country, Context.Guild.Id.ToString()).ConfigureAwait(false))
             {
                 EmbedBuilder emb = new EmbedBuilder()
                     .WithColor(SecurityInfo.botColor)
                     .WithDescription($"There is no role assigned to {country}.");
 
-                await Context.Channel.SendMessageAsync(embed: emb.Build());
+                await Context.Channel.SendMessageAsync(embed: emb.Build()).ConfigureAwait(false);
                 return;
             }
 
@@ -106,7 +106,7 @@ namespace HOI4Bot.Modules
             await Task.WhenAll(
                 userDatabase.Roles.RemoveRoleAsync(country, Context.Guild.Id.ToString()),
                 Context.Channel.SendMessageAsync(embed: embed.Build())
-            );
+            ).ConfigureAwait(false);
         }
 
         [SlashCommand("view-roles", "Views the roles currently used for countries and the Victory role")]
@@ -114,7 +114,7 @@ namespace HOI4Bot.Modules
         public async Task ViewRolesAsync()
         {
             string roleInfo = "";
-            Dictionary<string, string> roles = await userDatabase.Roles.GetRolesAsync(Context.Guild.Id.ToString());
+            Dictionary<string, string> roles = await userDatabase.Roles.GetRolesAsync(Context.Guild.Id.ToString()).ConfigureAwait(false);
 
             bool first = true;
             foreach (string country in roles.Keys.Where(x => majorAllies.Contains(x)))
@@ -217,14 +217,14 @@ namespace HOI4Bot.Modules
             {
                 roleInfo = "No roles have been set up.";
             }
-            await Context.Channel.SendMessageAsync(roleInfo);
+            await Context.Channel.SendMessageAsync(roleInfo).ConfigureAwait(false);
         }
 
         [SlashCommand("victory", "Gives the winning alliance the Victory role")]
         [RequireContext(ContextType.Guild)]
         public async Task VictoryAsync(string alliance)
         {
-            string? roleStr = await userDatabase.Roles.GetRoleAsync("Victory", Context.Guild.Id.ToString());
+            string? roleStr = await userDatabase.Roles.GetRoleAsync("Victory", Context.Guild.Id.ToString()).ConfigureAwait(false);
             SocketRole role;
             if (!ulong.TryParse(roleStr, out ulong roleId) || (role = Context.Guild.GetRole(roleId)) == null)
             {
@@ -232,7 +232,7 @@ namespace HOI4Bot.Modules
                     .WithColor(SecurityInfo.botColor)
                     .WithDescription("No role has been assigned as the Victory role.");
 
-                await Context.Channel.SendMessageAsync(embed: embed.Build());
+                await Context.Channel.SendMessageAsync(embed: embed.Build()).ConfigureAwait(false);
                 return;
             }
 
@@ -242,13 +242,13 @@ namespace HOI4Bot.Modules
                     .WithColor(SecurityInfo.botColor)
                     .WithDescription("Victory to the Allies!");
 
-                IEnumerable<string> allies = new List<string>().Concat(majorAllies).Concat(mijorAllies).Concat(minorAllies);
+                IEnumerable<string> allies = majorAllies.Concat(mijorAllies).Concat(minorAllies);
                 List<Task> cmds = new()
                 {
                     Context.Channel.SendMessageAsync(embed: embed.Build())
                 };
 
-                Dictionary<string, string> users = await userDatabase.Users.GetUsersAsync(Context.Guild.Id.ToString());
+                Dictionary<string, string> users = await userDatabase.Users.GetUsersAsync(Context.Guild.Id.ToString()).ConfigureAwait(false);
                 foreach (string key in users.Where(x => allies.Contains(x.Value)).ToDictionary(x => x.Key).Keys)
                 {
                     SocketGuildUser user;
@@ -258,7 +258,7 @@ namespace HOI4Bot.Modules
                     }
                 }
 
-                await Task.WhenAll(cmds);
+                await Task.WhenAll(cmds).ConfigureAwait(false);
             }
             else if (alliance.ToLower() == "axis")
             {
@@ -266,13 +266,13 @@ namespace HOI4Bot.Modules
                     .WithColor(SecurityInfo.botColor)
                     .WithDescription("Victory to the Axis!");
 
-                IEnumerable<string> axis = new List<string>().Concat(majorAxis).Concat(mijorAxis).Concat(minorAxis);
+                IEnumerable<string> axis = majorAxis.Concat(mijorAxis).Concat(minorAxis);
                 List<Task> cmds = new()
                 {
                     Context.Channel.SendMessageAsync(embed: embed.Build())
                 };
 
-                Dictionary<string, string> users = await userDatabase.Users.GetUsersAsync(Context.Guild.Id.ToString());
+                Dictionary<string, string> users = await userDatabase.Users.GetUsersAsync(Context.Guild.Id.ToString()).ConfigureAwait(false);
                 foreach (string key in users.Where(x => axis.Contains(x.Value)).ToDictionary(x => x.Key).Keys)
                 {
                     SocketGuildUser user;
@@ -282,7 +282,7 @@ namespace HOI4Bot.Modules
                     }
                 }
 
-                await Task.WhenAll(cmds);
+                await Task.WhenAll(cmds).ConfigureAwait(false);
             }
             else
             {
@@ -290,7 +290,7 @@ namespace HOI4Bot.Modules
                     .WithColor(SecurityInfo.botColor)
                     .WithDescription($"{alliance} is not a valid alliance.");
 
-                await Context.Channel.SendMessageAsync(embed: embed.Build());
+                await Context.Channel.SendMessageAsync(embed: embed.Build()).ConfigureAwait(false);
             }
         }
 
@@ -298,7 +298,7 @@ namespace HOI4Bot.Modules
         [RequireContext(ContextType.Guild)]
         public async Task ClearVictoryAsync()
         {
-            string? roleStr = await userDatabase.Roles.GetRoleAsync("Victory", Context.Guild.Id.ToString());
+            string? roleStr = await userDatabase.Roles.GetRoleAsync("Victory", Context.Guild.Id.ToString()).ConfigureAwait(false);
             SocketRole role;
             if (!ulong.TryParse(roleStr, out ulong roleId) || (role = Context.Guild.GetRole(roleId)) == null)
             {
@@ -306,7 +306,7 @@ namespace HOI4Bot.Modules
                     .WithColor(SecurityInfo.botColor)
                     .WithDescription("No role has been assigned as the Victory role.");
 
-                await Context.Channel.SendMessageAsync(embed: emb.Build());
+                await Context.Channel.SendMessageAsync(embed: emb.Build()).ConfigureAwait(false);
                 return;
             }
 
@@ -323,7 +323,7 @@ namespace HOI4Bot.Modules
                 cmds.Add(user.RemoveRoleAsync(role));
             }
 
-            await Task.WhenAll(cmds);
+            await Task.WhenAll(cmds).ConfigureAwait(false);
         }
 
         [SlashCommand("new-war", "Creates a new war")]
@@ -333,19 +333,19 @@ namespace HOI4Bot.Modules
             List<Task> cmds = new();
             foreach (SocketGuildUser user in Context.Guild.Users)
             {
-                string? country = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
+                string? country = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString()).ConfigureAwait(false);
                 if (country == default)
                 {
                     continue;
                 }
 
                 SocketRole role;
-                if (ulong.TryParse(await userDatabase.Roles.GetRoleAsync(country, Context.Guild.Id.ToString()), out ulong roleId) && (role = Context.Guild.GetRole(roleId)) != null)
+                if (ulong.TryParse(await userDatabase.Roles.GetRoleAsync(country, Context.Guild.Id.ToString()).ConfigureAwait(false), out ulong roleId) && (role = Context.Guild.GetRole(roleId)) != null)
                 {
                     cmds.Add(Context.Guild.GetUser(user.Id).RemoveRoleAsync(role));
                 }
             }
-            await Task.WhenAll(cmds);
+            await Task.WhenAll(cmds).ConfigureAwait(false);
 
             EmbedBuilder embed = new EmbedBuilder()
                 .WithColor(SecurityInfo.botColor)
@@ -355,14 +355,14 @@ namespace HOI4Bot.Modules
             (
                 userDatabase.Users.ClearUserAsync(Context.Guild.Id.ToString()),
                 Context.Channel.SendMessageAsync(embed: embed.Build())
-            );
+            ).ConfigureAwait(false);
         }
 
         [SlashCommand("view-war", "Displays the war info")]
         [RequireContext(ContextType.Guild)]
         public async Task ViewWarAsync()
         {
-            Dictionary<string, string> users = await userDatabase.Users.GetUsersAsync(Context.Guild.Id.ToString());
+            Dictionary<string, string> users = await userDatabase.Users.GetUsersAsync(Context.Guild.Id.ToString()).ConfigureAwait(false);
             string userInfo = "";
 
             bool first = true;
@@ -456,29 +456,31 @@ namespace HOI4Bot.Modules
             {
                 userInfo = "No wars have been set up.";
             }
-            await Context.Channel.SendMessageAsync(userInfo);
+            await Context.Channel.SendMessageAsync(userInfo).ConfigureAwait(false);
         }
 
         [SlashCommand("assign", "Assigns a user to a specific country")]
         [RequireContext(ContextType.Guild)]
         public async Task AssignAsync(SocketUser user, string country)
         {
-            IEnumerable<string> countries = new List<string>().Concat(majorAllies).Concat(majorAxis).Concat(mijorAllies).Concat(mijorAxis).Concat(minorAllies).Concat(minorAxis);
+            IEnumerable<string> countries = majorAllies.Concat(majorAxis).Concat(mijorAllies).Concat(mijorAxis).Concat(minorAllies).Concat(minorAxis);
             if (!countries.Contains(country))
             {
                 EmbedBuilder emb = new EmbedBuilder()
                     .WithColor(SecurityInfo.botColor)
                     .WithDescription($"{country} is not a valid country.");
 
-                await Context.Channel.SendMessageAsync(embed: emb.Build());
+                await Context.Channel.SendMessageAsync(embed: emb.Build()).ConfigureAwait(false);
                 return;
             }
 
             SocketRole oldRole;
-            string? oldCountry = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString());
-            if (oldCountry != default && ulong.TryParse(await userDatabase.Roles.GetRoleAsync(oldCountry, Context.Guild.Id.ToString()), out ulong oldRoleId) && (oldRole = Context.Guild.GetRole(oldRoleId)) != null)
+            string? oldCountry = await userDatabase.Users.GetCountryAsync(user.Id.ToString(), Context.Guild.Id.ToString()).ConfigureAwait(false);
+            if (oldCountry != default
+                && ulong.TryParse(await userDatabase.Roles.GetRoleAsync(oldCountry, Context.Guild.Id.ToString()).ConfigureAwait(false), out ulong oldRoleId)
+                && (oldRole = Context.Guild.GetRole(oldRoleId)) != null)
             {
-                await Context.Guild.GetUser(user.Id).RemoveRoleAsync(oldRole);
+                await Context.Guild.GetUser(user.Id).RemoveRoleAsync(oldRole).ConfigureAwait(false);
             }
 
             EmbedBuilder embed = new EmbedBuilder()
@@ -492,12 +494,12 @@ namespace HOI4Bot.Modules
             };
 
             SocketRole role;
-            if (ulong.TryParse(await userDatabase.Roles.GetRoleAsync(country, Context.Guild.Id.ToString()), out ulong roleId) && (role = Context.Guild.GetRole(roleId)) != null)
+            if (ulong.TryParse(await userDatabase.Roles.GetRoleAsync(country, Context.Guild.Id.ToString()).ConfigureAwait(false), out ulong roleId) && (role = Context.Guild.GetRole(roleId)) != null)
             {
                 cmds.Add(Context.Guild.GetUser(user.Id).AddRoleAsync(role));
             }
 
-            await Task.WhenAll(cmds);
+            await Task.WhenAll(cmds).ConfigureAwait(false);
         }
     }
 }

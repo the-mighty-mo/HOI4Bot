@@ -16,7 +16,7 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             return cmd.ExecuteNonQueryAsync();
         }
 
-        public async Task AddRoleAsync(string country, string roleId, string guildId)
+        public Task AddRoleAsync(string country, string roleId, string guildId)
         {
             string update = "UPDATE Roles SET role_id = @role_id WHERE country = @country AND guild_id = @guild_id;";
             string insert = "INSERT INTO Roles (country, role_id, guild_id) SELECT @country, @role_id, @guild_id WHERE (SELECT Changes() = 0);";
@@ -26,10 +26,10 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             cmd.Parameters.AddWithValue("@role_id", roleId);
             cmd.Parameters.AddWithValue("@guild_id", guildId);
 
-            await cmd.ExecuteNonQueryAsync();
+            return cmd.ExecuteNonQueryAsync();
         }
 
-        public async Task RemoveRoleAsync(string country, string guildId)
+        public Task RemoveRoleAsync(string country, string guildId)
         {
             string delete = "DELETE FROM Roles WHERE country = @country AND guild_id = @guild_id;";
 
@@ -37,7 +37,7 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             cmd.Parameters.AddWithValue("@country", country);
             cmd.Parameters.AddWithValue("@guild_id", guildId);
 
-            await cmd.ExecuteNonQueryAsync();
+            return cmd.ExecuteNonQueryAsync();
         }
 
         public async Task<bool> IsCountryAsync(string country, string guildId)
@@ -50,8 +50,8 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             cmd.Parameters.AddWithValue("@country", country);
             cmd.Parameters.AddWithValue("@guild_id", guildId);
 
-            SqliteDataReader reader = await cmd.ExecuteReaderAsync();
-            hasCountry = await reader.ReadAsync();
+            SqliteDataReader reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+            hasCountry = await reader.ReadAsync().ConfigureAwait(false);
 
             return hasCountry;
         }
@@ -66,8 +66,8 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             cmd.Parameters.AddWithValue("@country", country);
             cmd.Parameters.AddWithValue("@guild_id", guildId);
 
-            SqliteDataReader reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            SqliteDataReader reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+            if (await reader.ReadAsync().ConfigureAwait(false))
             {
                 roleId = reader["role_id"].ToString();
             }
@@ -84,8 +84,8 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             using SqliteCommand cmd = new(getRoles, connection);
             cmd.Parameters.AddWithValue("@guild_id", guildId);
 
-            SqliteDataReader reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            SqliteDataReader reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+            while (await reader.ReadAsync().ConfigureAwait(false))
             {
                 string? country = reader["country"].ToString();
                 string? roleId = reader["role_id"].ToString();
