@@ -10,13 +10,13 @@ namespace HOI4Bot.Databases.UserDatabaseTables
 
         public RolesTable(SqliteConnection connection) => this.connection = connection;
 
-        public Task InitAsync()
+        public async Task InitAsync()
         {
             using SqliteCommand cmd = new("CREATE TABLE IF NOT EXISTS Roles (country TEXT NOT NULL, role_id TEXT NOT NULL, guild_id TEXT NOT NULL, UNIQUE(country, guild_id));", connection);
-            return cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
 
-        public Task AddRoleAsync(string country, string roleId, string guildId)
+        public async Task AddRoleAsync(string country, string roleId, string guildId)
         {
             string update = "UPDATE Roles SET role_id = @role_id WHERE country = @country AND guild_id = @guild_id;";
             string insert = "INSERT INTO Roles (country, role_id, guild_id) SELECT @country, @role_id, @guild_id WHERE (SELECT Changes() = 0);";
@@ -26,10 +26,10 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             cmd.Parameters.AddWithValue("@role_id", roleId);
             cmd.Parameters.AddWithValue("@guild_id", guildId);
 
-            return cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
 
-        public Task RemoveRoleAsync(string country, string guildId)
+        public async Task RemoveRoleAsync(string country, string guildId)
         {
             string delete = "DELETE FROM Roles WHERE country = @country AND guild_id = @guild_id;";
 
@@ -37,7 +37,7 @@ namespace HOI4Bot.Databases.UserDatabaseTables
             cmd.Parameters.AddWithValue("@country", country);
             cmd.Parameters.AddWithValue("@guild_id", guildId);
 
-            return cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
 
         public async Task<bool> IsCountryAsync(string country, string guildId)
